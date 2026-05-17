@@ -1,7 +1,10 @@
-██████╗ ██╗   ██╗███████╗███████╗███████╗██████╗ 
+██████╗ ██╗   ██╗███████╗███████╗███████╗██████╗
 ██╔══██╗██║   ██║██╔════╝██╔════╝██╔════╝██╔══██╗
 ██████╔╝██║   ██║█████╗  █████╗  █████╗  ██████╔╝
 ██╔═══╝ ██║   ██║██╔══╝  ██╔══╝  ██╔══╝  ██╔══██╗
 ██║     ╚██████╔╝██║     ██║     ███████╗██║  ██║
 ╚═╝      ╚═════╝ ╚═╝     ╚═╝     ╚══════╝╚═╝  ╚═╝
-                                                 
+
+research work lives in `sigscan` - sadly the ida and debugger adventures arent really shown here..
+a simple injector in `injector`
+and the overlay in `internaloverlay`
