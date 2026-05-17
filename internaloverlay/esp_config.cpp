@@ -243,6 +243,7 @@ bool EspConfig::Load(const wchar_t* path) {
     const JsonValue* ent = root.get("entity_offsets");
     if (ent) {
         m_pGameSceneNode = ent->getHex("m_pGameSceneNode");
+        m_iTeamNum = ent->getHex("m_iTeamNum");
     }
 
     // Parse scene node offsets

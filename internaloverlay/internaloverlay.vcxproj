@@ -88,10 +88,14 @@
     </ClCompile>
     <ClCompile Include="logger.cpp" />
     <ClCompile Include="esp_config.cpp" />
+    <ClCompile Include="esp_entities.cpp" />
+    <ClCompile Include="esp_globals.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="logger.h" />
     <ClInclude Include="esp_config.h" />
+    <ClInclude Include="esp_entities.h" />
+    <ClInclude Include="esp_globals.h" />
     <ClInclude Include="version.h" />
     <ClInclude Include="MinHook.h" />
     <ClInclude Include="buffer.h" />

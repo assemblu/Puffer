@@ -20,9 +20,13 @@
 #include "backends/imgui_impl_dx11.h"
 
 #include "esp_config.h"
+#include "esp_globals.h"
+#include "esp_entities.h"
 #include "version.h"
 
-EspConfig g_config;
+EspConfig            g_config;
+EspGlobals           g_globals;
+std::vector<EspPlayer> g_players;
 
 
 
@@ -166,7 +170,13 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
     delWasDown = delIsDown;
 
     if (showOverlay) {
-        
+        // Refresh globals periodically (~1 sec)
+        if (frameCount % 60 == 0) {
+            RefreshGlobals(g_globals);
+        }
+
+        // Update entities every frame
+        UpdateEntities(g_config, g_globals, g_players);
 
         ImGui::SetNextWindowPos(ImVec2(10, 10), ImGuiCond_Always);
         ImGui::Begin("CS2 Overlay", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings);
@@ -201,6 +211,32 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
         ImGui::Text("m_vecOrigin:             0x%llX", g_config.m_vecOrigin);
         ImGui::Separator();
         ImGui::Text("chunks: %u | ents/chunk: %u | stride: 0x%llX", g_config.chunkCount, g_config.entitiesPerChunk, g_config.entryStride);
+
+        // Resolved globals
+        ImGui::Separator();
+        if (g_globals.valid) {
+            ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Globals: VALID");
+        } else {
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Globals: INVALID");
+        }
+        ImGui::Text("ControllerArray:  0x%p", (void*)g_globals.controllerArray);
+        ImGui::Text("ViewMatrix:       0x%p", (void*)g_globals.viewMatrix);
+        ImGui::Text("EntityListChunks: 0x%p", (void*)g_globals.entityListChunks);
+
+        // Entity data
+        ImGui::Separator();
+        int aliveCount = 0;
+        for (auto& p : g_players) if (p.alive) aliveCount++;
+        ImGui::Text("Players: %d total, %d alive", (int)g_players.size(), aliveCount);
+        for (auto& p : g_players) {
+            const char* teamStr = p.team == 2 ? "CT" : (p.team == 3 ? "T" : "??");
+            char buf[128];
+            snprintf(buf, sizeof(buf), "%sSlot %d | HP %u | Team %s | Pos: %.0f, %.0f, %.0f",
+                     p.isLocal ? "[L] " : "    ", p.slot, p.health, teamStr,
+                     p.position[0], p.position[1], p.position[2]);
+            ImVec4 col = p.alive ? ImVec4(0.2f, 1.0f, 0.2f, 1.0f) : ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
+            ImGui::TextColored(col, "%s", buf);
+        }
 
         ImGui::End();
     }
@@ -253,6 +289,9 @@ void HookThread() {
             OverlayLog(L"[overlay] Config load FAILED — using zeroed offsets");
         }
     }
+
+    // Resolve globals from client.dll base + config RVAs
+    InitGlobals(g_config, g_globals);
 
     if (MH_Initialize() != MH_OK) {
         OverlayLog(L"[overlay] MinHook initialization failed");

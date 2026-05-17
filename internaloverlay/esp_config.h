@@ -16,6 +16,7 @@ struct EspConfig {
 
     // Entity offsets
     uintptr_t m_pGameSceneNode = 0;
+    uintptr_t m_iTeamNum = 0;
 
     // Scene node offsets
     uintptr_t m_vecAbsOrigin = 0;
